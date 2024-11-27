@@ -23,8 +23,6 @@ CMD [ "air", "-c", ".air.toml" ]
 FROM base AS builder
 WORKDIR /app
 
-ENV GIN_MODE="release"
-
 COPY go.mod go.sum .air.toml ./
 RUN go mod download && go mod verify
 
@@ -32,6 +30,8 @@ COPY *.go ./
 RUN go build -o ./apigateway
 
 FROM alpine:latest AS prod
+
+ENV GIN_MODE="release"
 
 COPY --from=builder /app/apigateway /usr/local/bin/apigateway
 EXPOSE 8080
