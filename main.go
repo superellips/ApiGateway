@@ -13,6 +13,25 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func PostNewGuestbook(c *gin.Context) {
+	url := "http://guestbookservice:8080/api/version/guestbook"
+	// domain
+	// requireApproval
+	// ownerId
+	response, err := http.Post(url, "application/json", c.Request.Body)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create guestbook"})
+		return
+	}
+	defer response.Body.Close()
+	jsonData, err := io.ReadAll(response.Body)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read response data"})
+		return
+	}
+	c.Data(response.StatusCode, "application/json", jsonData)
+}
+
 func GetMessages(c *gin.Context) {
 	id := c.Param("gbId")
 	if !IsValidOrigin(c, id) {
@@ -85,6 +104,23 @@ func GetUserById(c *gin.Context) {
 	}
 	c.Data(response.StatusCode, "application/json", json)
 
+}
+
+func GetUserByName(c *gin.Context) {
+	name := c.Param("name")
+	url := "http://userservice:8080/api/version/user/name/" + name
+	response, err := http.Get(url)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch data"})
+		return
+	}
+	defer response.Body.Close()
+	json, err := io.ReadAll(response.Body)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read response"})
+		return
+	}
+	c.Data(response.StatusCode, "application/json", json)
 }
 
 func IsValidOrigin(c *gin.Context, id string) bool {
@@ -161,7 +197,10 @@ func main() {
 		private.POST("/messages/:gbId", PostMessage)
 
 		private.POST("/user/register", PostRegisterUser)
-		private.GET("/user/:id", GetUserById)
+		private.GET("/user/id/:id", GetUserById)
+		private.GET("/user/name/:name", GetUserByName)
+
+		private.POST("/guestbook/new", PostNewGuestbook)
 	}
 
 	router.Run()
