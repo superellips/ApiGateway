@@ -13,8 +13,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var guestbookHost string = os.Getenv("GUESTBOOK_HOST")
+var userHost string = os.Getenv("USER_HOST")
+var aclHost string = os.Getenv("ACL_HOST")
+
 func PostNewGuestbook(c *gin.Context) {
-	url := "http://guestbookservice:8080/api/version/guestbook"
+	url := "http://" + guestbookHost + "/api/version/guestbook"
 	// domain
 	// requireApproval
 	// ownerId
@@ -38,7 +42,7 @@ func GetMessages(c *gin.Context) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Forbidden origin."})
 		return
 	}
-	url := "http://guestbookservice:8080/api/version/guestbook/" + id + "/messages"
+	url := "http://" + guestbookHost + "/api/ersion/guestbook/" + id + "/messages"
 	response, err := http.Get(url)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch data"})
@@ -59,7 +63,7 @@ func PostMessage(c *gin.Context) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Forbidden origin."})
 		return
 	}
-	url := "http://guestbookservice:8080/api/version/guestbook/" + id + "/message"
+	url := "http://" + guestbookHost + "/api/version/guestbook/" + id + "/message"
 	response, err := http.Post(url, "application/json", c.Request.Body)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to access service."})
@@ -75,7 +79,7 @@ func PostMessage(c *gin.Context) {
 }
 
 func PostRegisterUser(c *gin.Context) {
-	url := "http://userservice:8080/api/version/users"
+	url := "http://" + userHost + "/api/version/users"
 	response, err := http.Post(url, "application/json", c.Request.Body)
 	if err != nil {
 		return
@@ -90,7 +94,7 @@ func PostRegisterUser(c *gin.Context) {
 
 func GetUserById(c *gin.Context) {
 	id := c.Param("id")
-	url := "http://userservice:8080/api/version/user/" + id
+	url := "http://" + userHost + "/api/version/user/" + id
 	response, err := http.Get(url)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch data"})
@@ -108,7 +112,7 @@ func GetUserById(c *gin.Context) {
 
 func GetUserByName(c *gin.Context) {
 	name := c.Param("name")
-	url := "http://userservice:8080/api/version/user/name/" + name
+	url := "http://" + userHost + "/api/version/user/name/" + name
 	response, err := http.Get(url)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch data"})
@@ -141,7 +145,7 @@ func IsValidOrigin(c *gin.Context, id string) bool {
 }
 
 func GetGuestbookAllowedDomain(id string) (string, error) {
-	url := "http://guestbookservice:8080/api/version/guestbook/" + id
+	url := "http://" + guestbookHost + "/api/version/guestbook/" + id
 	response, err := http.Get(url)
 	if err != nil {
 		panic(err)

@@ -17,12 +17,15 @@ spec:
       containers:
       - name: apigateway-container
         image: ghcr.io/superellips/apigateway:b238ee883e83d9d2a9f51785414a12b40978e94d
-        resources:
-          limits:
-            cpu: "10"
-            memory: "100Mi"
-          requests:
-            cpu: "10 "
-            memory: "50Mi"
+        # resources:
+        #   limits:
+        #     cpu: "10"
+        #     memory: "100Mi"
+        #   requests:
+        #     cpu: "10 "
+        #     memory: "50Mi"
         ports:
         - containerPort: 8080
+        envFrom: 
+        - configMapRef:
+            name: apigateway-config

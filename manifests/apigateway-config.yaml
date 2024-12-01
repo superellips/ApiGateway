@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: apigateway-config
+data:
+  GUESTBOOK_ROOT_DOMAIN: "localhost"
+  GUESTBOOK_HOST: "guestbookservice-service"
+  USER_HOST: "userservice-service"
+  ACL_HOST: "aclservice-service"
