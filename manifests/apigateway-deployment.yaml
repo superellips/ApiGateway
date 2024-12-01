@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "apigateway-deployment"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "apigateway-app"
+  template:
+    metadata:
+      labels:
+        app: "apigateway-app"
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+      - name: apigateway-container
+        image: ghcr.io/superellips/apigateway:latest
+        resources:
+          limits:
+            cpu: "10"
+            memory: "100Mi"
+          requests:
+            cpu: "10 "
+            memory: "50Mi"
+        ports:
+        - containerPort: 8080
