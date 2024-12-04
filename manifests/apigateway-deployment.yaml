@@ -16,7 +16,7 @@ spec:
       - name: regcred
       containers:
       - name: apigateway-container
-        image: ghcr.io/superellips/apigateway:e38f8d71784f9abc05734656d98aba2ed4d19c41
+        image: ghcr.io/superellips/apigateway:6211bb2807f618d8a040b6f4a7adc4b5b014a126
         # resources:
         #   limits:
         #     cpu: "10"
