@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 
@@ -54,6 +55,17 @@ func GetUserByName(c *gin.Context) {
 	c.Data(http.StatusOK, "application/json", json)
 }
 
+func GetActiveUser(c *gin.Context) {
+	claims, err := ExtractAuthClaims(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "no authenticated user"})
+		return
+	}
+	fmt.Println(claims["userId"].(string))
+	fmt.Println(claims["name"].(string))
+	c.JSON(http.StatusOK, gin.H{"id": claims["userId"].(string), "name": claims["name"].(string)})
+}
+
 func PostLoginUser(c *gin.Context) {
 	// Add password validation
 	loginData, err := io.ReadAll(c.Request.Body)
@@ -87,5 +99,5 @@ func PostLoginUser(c *gin.Context) {
 		return
 	}
 	c.SetCookie("auth", token, 3600, "/", "http://localhost:8888", false, true)
-	c.JSON(http.StatusOK, gin.H{"message": "Login successful"})
+	c.Data(http.StatusOK, "application/json", response)
 }
