@@ -72,6 +72,14 @@ func PostMessage(c *gin.Context) {
 	c.Data(http.StatusOK, "application/json", json)
 }
 
+func OptionsMessage(c *gin.Context) {
+	id := c.Param("gbId")
+	if !isValidOrigin(c, id) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Forbidden origin"})
+		return
+	}
+}
+
 func GetGuestbookAllowedDomain(id string) (string, error) {
 	url := "http://" + guestbookHost + "/api/version/guestbook/" + id
 	jsonData, err := GetReponseData(url)

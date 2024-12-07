@@ -82,6 +82,7 @@ func main() {
 	{
 		public.GET("/messages/:gbId", GetMessages)
 		public.POST("/messages/:gbId", PostMessage)
+		public.OPTIONS("/messages/:gbId", OptionsMessage)
 	}
 
 	private := router.Group("/")
