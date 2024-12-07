@@ -9,7 +9,7 @@ import (
 
 func PostRegisterUser(c *gin.Context) {
 	url := "http://" + userHost + "/api/version/users"
-	json, err := GetReponseData(url)
+	json, err := PostResponseData(url, c.Request.Body)
 	if err != nil {
 		return
 	}
@@ -78,7 +78,7 @@ func PostLoginUser(c *gin.Context) {
 		return
 	}
 	if !ValidatePassword("password", "hash") {
-		c.JSON(http.StatusOK, gin.H{"error": "authentication failed"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "authentication failed"})
 		return
 	}
 	token, err := GenerateToken(data["name"].(string), data["id"].(string))
