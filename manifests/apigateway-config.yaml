@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: apigateway-config
 data:
-  GUESTBOOK_ROOT_DOMAIN: "localhost"
+  GUESTBOOK_ROOT_DOMAIN: "guestbooks.online"
   GUESTBOOK_HOST: "guestbookservice-service"
   USER_HOST: "userservice-service"
   ACL_HOST: "aclservice-service"

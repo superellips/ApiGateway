@@ -58,7 +58,7 @@ func PostResponseData(url string, body io.Reader) ([]byte, error) {
 }
 
 func main() {
-	hostname := "http://" + os.Getenv("GUESTBOOK_ROOT_DOMAIN")
+	hostname := os.Getenv("GUESTBOOK_ROOT_DOMAIN")
 
 	router := gin.Default()
 
