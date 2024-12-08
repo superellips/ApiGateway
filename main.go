@@ -93,6 +93,8 @@ func main() {
 		private.POST("/guestbook/new", PostNewGuestbook)
 		private.GET("/guestbook/:id", GetGuestbook)
 
+		private.GET("/guestbook/:id/delete/:msgId", GetDeleteMessage)
+
 		private.GET("/user/active", GetActiveUser)
 		private.POST("/user/register", PostRegisterUser)
 		private.GET("/user/id/:id", GetUserById)

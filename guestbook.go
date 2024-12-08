@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
@@ -9,6 +10,15 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
+type Message struct {
+	Id          string `json:"id"`
+	GuestbookId string `json:"guestbookId"`
+	SenderName  string `json:"senderName"`
+	SenderEmail string `json:"senderEmail"`
+	Text        string `json:"text"`
+	Approved    bool   `json:"approved"`
+}
 
 func PostNewGuestbook(c *gin.Context) {
 	claims, err := ExtractAuthClaims(c)
@@ -37,6 +47,23 @@ func PostNewGuestbook(c *gin.Context) {
 	jsonData, err := PostResponseData(url, bytes.NewBuffer(data))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read response data"})
+		return
+	}
+	guestbook, err := UnmarshalJsonData(jsonData)
+	if err != nil {
+		return
+	}
+	newAcl := map[string]interface{}{
+		"guestbookId": guestbook["id"].(string),
+		"userId":      claims["userId"].(string),
+	}
+	aclData, err := MarshalJsonData(newAcl)
+	if err != nil {
+		return
+	}
+	url = "http://" + aclHost + "/api/version/acls"
+	_, err = PostResponseData(url, bytes.NewBuffer(aclData))
+	if err != nil {
 		return
 	}
 	c.Data(http.StatusOK, "application/json", jsonData)
@@ -99,12 +126,46 @@ func GetGuestbookAllowedDomain(id string) (string, error) {
 
 func GetGuestbook(c *gin.Context) {
 	url := "http://" + guestbookHost + "/api/version/guestbook/" + c.Param("id")
-	json, err := GetReponseData(url)
+	jsonData, err := GetReponseData(url)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
 	}
-	c.Data(http.StatusOK, "application/json", json)
+	guestbookJson, err := UnmarshalJsonData(jsonData)
+	if err != nil {
+		return
+	}
+	messageListData, err := GetReponseData("http://" + guestbookHost + "/api/version/guestbook/" + c.Param("id") + "/messages")
+	if err != nil {
+		return
+	}
+	var ml []Message
+	if err := json.Unmarshal(messageListData, &ml); err != nil {
+		return
+	}
+	guestbookJson["messages"] = ml
+	returnData, err := json.Marshal(guestbookJson)
+	if err != nil {
+		return
+	}
+	c.Data(http.StatusOK, "application/json", returnData)
+}
+
+func GetDeleteMessage(c *gin.Context) {
+	url := "http://" + guestbookHost + "/api/version/guestbook/" + c.Param("id") + "/message/" + c.Param("msgId")
+	client := &http.Client{}
+	req, err := http.NewRequest("DELETE", url, nil)
+	if err != nil {
+		return
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return
+	}
+	if resp.StatusCode != http.StatusOK {
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "message deleted"})
 }
 
 func isValidOrigin(c *gin.Context, id string) bool {

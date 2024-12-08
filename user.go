@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -27,14 +28,45 @@ func GetUserById(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
-	url := "http://" + userHost + "/api/version/user/" + c.Param("id")
-	json, err := GetReponseData(url)
+	userUrl := "http://" + userHost + "/api/version/user/" + c.Param("id")
+	userData, err := GetReponseData(userUrl)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read response"})
 		return
 	}
+	userJson, err := UnmarshalJsonData(userData)
+	if err != nil {
+		return
+	}
 	// Get the users available guestbooks too please
-	c.Data(http.StatusOK, "application/json", json)
+	aclUrl := "http://" + aclHost + "/api/version/acls/user/" + claims["userId"].(string)
+	aclData, err := GetReponseData(aclUrl)
+	if err != nil {
+		return
+	}
+	var aclList []map[string]string
+	if err := json.Unmarshal(aclData, &aclList); err != nil {
+		return
+	}
+	guestbooks := make(map[string]string)
+	for _, val := range aclList {
+		gbUrl := "http://" + guestbookHost + "/api/version/guestbook/" + val["guestbookId"]
+		gbData, err := GetReponseData(gbUrl)
+		if err != nil {
+			return
+		}
+		gbJson, err := UnmarshalJsonData(gbData)
+		if err != nil {
+			return
+		}
+		guestbooks[val["guestbookId"]] = gbJson["domain"].(string)
+	}
+	userJson["guestbooks"] = guestbooks
+	returnData, err := MarshalJsonData(userJson)
+	if err != nil {
+		return
+	}
+	c.Data(http.StatusOK, "application/json", returnData)
 }
 
 func GetUserByName(c *gin.Context) {
