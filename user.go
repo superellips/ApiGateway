@@ -33,6 +33,7 @@ func GetUserById(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read response"})
 		return
 	}
+	// Get the users available guestbooks too please
 	c.Data(http.StatusOK, "application/json", json)
 }
 
